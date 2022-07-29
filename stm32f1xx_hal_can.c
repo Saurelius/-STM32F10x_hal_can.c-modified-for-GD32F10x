@@ -330,7 +330,13 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
   }
 #endif /* (USE_HAL_CAN_REGISTER_CALLBACKS) */
 
-  /* Request initialisation */	
+  /* Request initialisation */
+  /* if using GD32F1, CAN_CTL_SLPWMOD (STM CAN_MCR_SLEEP) bit must be reset.
+	 Otherwise unable to set CAN_CTL_IWMOD (STM CAN_MCR_INRQ) bit.  CAN_STAT_IWS (STM CAN_MSR_INAK) bit don't will be set,
+	 and the next "while" cycle (Wait initialisation acknowledge) ends with HAL_CAN_ERROR_TIMEOUT error.
+  */
+  CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);
+  
   SET_BIT(hcan->Instance->MCR, CAN_MCR_INRQ);
 
   /* Get tick */
